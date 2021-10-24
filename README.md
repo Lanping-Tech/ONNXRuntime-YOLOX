@@ -18,8 +18,6 @@ pip install -r requirements.txt
 
 `test.jpg`：测试图片。
 
-`test.mp4`：测试视频。
-
 ## 运行
 1. 读取图片进行检测
 ```
