@@ -247,3 +247,28 @@ def vis(img, boxes, scores, cls_ids, conf=0.5, class_names=None):
         cv2.putText(img, text, (x0, y0 + txt_size[1]), font, 0.4, txt_color, thickness=1)
 
     return img
+
+def format_input_tensor(tensor, input_details, idx):
+    details = input_details[idx]
+    dtype = details['dtype']
+    if dtype == np.uint8 or dtype == np.int8:
+        quant_params = details['quantization_parameters']
+        input_tensor = tensor / quant_params['scales'] + quant_params['zero_points']
+        if dtype == np.int8:
+            input_tensor = input_tensor.clip(-128, 127)
+        else:
+            input_tensor = input_tensor.clip(0, 255)
+        return input_tensor.astype(dtype)
+    else:
+        return tensor
+
+def get_output_tensor(interpreter, output_details, idx):
+    details = output_details[idx]
+    if details['dtype'] == np.uint8 or details['dtype'] == np.int8:
+        quant_params = details['quantization_parameters']
+        int_tensor = interpreter.get_tensor(details['index']).astype(np.int32)
+        real_tensor = int_tensor - quant_params['zero_points']
+        real_tensor = real_tensor.astype(np.float32) * quant_params['scales']
+    else:
+        real_tensor = interpreter.get_tensor(details['index'])
+    return real_tensor

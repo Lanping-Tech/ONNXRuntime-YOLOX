@@ -27,13 +27,13 @@ def make_parser():
     parser.add_argument(
         "--mode",
         type=str,
-        default="video",
+        default="image",
         help="mode type, eg. image, video and webcam.",
     )
     parser.add_argument(
         "--input_path",
         type=str,
-        default='test.mp4',
+        default='test.jpg',
         help="Path to your input image.",
     )
     parser.add_argument(
@@ -79,6 +79,7 @@ def inference(args, origin_img):
 
     ort_inputs = {session.get_inputs()[0].name: img[None, :, :, :]}
     output = session.run(None, ort_inputs)
+    print(output[0].shape)
     predictions = demo_postprocess(output[0], input_shape, p6=args.with_p6)[0]
 
     boxes = predictions[:, :4]
